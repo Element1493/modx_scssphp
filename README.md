@@ -26,8 +26,6 @@
 {'!SCSS'|snippet}
 ```
 
-Также предусмотрены переменные, такие же как в **Системные настройки**.
-
 ## Ссылки:
 1. [Библиотека SCSSPHP](https://github.com/leafo/scssphp/)
 2. [Документация по SCSS](https://sass-lang.com/documentation)
