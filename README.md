@@ -10,7 +10,7 @@
 -|-|-
 **scss.admin**|Выполнить код для авторизованных|**Да**
 **scss.fileCss**|Путь к CSS|**{assets_path}css/styles.css**
-**scss.fileScss**|Путь к SCSS|**{assets_path}scss/styles.scss**
+**scss.fileScss**|Пути к SCSS|**{assets_path}scss/styles.scss**
 **scss.importPaths**|Пути импорта|
 **scss.outputStyle**|Сжать выходной файл CSS|**Да**
 **scss.scssHash**|Hash SCSS|**Да**
@@ -18,11 +18,13 @@
 
 ### Инструкция:
 Для работы данного компонента достаточно вставить сниппет в шаблон:
-```html[[!SCSS]]```
+```html
+[[!SCSS]]
+```
 **Fenom**
-```html{'!SCSS'|snippet}```
-
-Также предусмотрены переменные, такие же как в **Системные настройки**.
+```html
+{'!SCSS'|snippet}
+```
 
 ## Ссылки:
 1. [Библиотека SCSSPHP](https://github.com/leafo/scssphp/)
