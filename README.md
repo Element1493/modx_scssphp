@@ -9,12 +9,12 @@
 Ключ| Название|По умолчанию
 -|-|-
 **scss.admin**|Выполнить код для авторизованных|**Да**
-**scss.fileCss**|Путь к CSS|**{assets_path}css/styles.css**
-**scss.fileScss**|Пути к SCSS|**{assets_path}scss/styles.scss**
+**scss.fileCss**|Путь к файлу CSS|**{assets_path}css/styles.css**
+**scss.fileScss**|Список файлов SCSS|**{assets_path}scss/styles.scss**
 **scss.importPaths**|Пути импорта|
-**scss.outputStyle**|Сжать выходной файл CSS|**Да**
+**scss.outputStyle**|Сжимать CSS?|**Да**
 **scss.scssHash**|Hash SCSS|**Да**
-**scss.sourceMap**|Генерировать sourceMap|**Нет**
+**scss.sourceMap**|Сгенерировать Source Map|**Нет**
 
 ### Инструкция:
 Для работы данного компонента достаточно вставить сниппет в шаблон:
