@@ -10,12 +10,12 @@ $tmp = array(
     ),
 	'fileScss' => array(	
         'xtype'    =>'textfield',
-        'value'    =>'{assets_path}scss/styles.scss',
+        'value'    =>'{assets_url}scss/styles.scss',
         'area'     =>'scss_main'
     ),
     'fileCss' => array(	
         'xtype'    =>'textfield',
-        'value'    =>'{assets_path}css/styles.css',
+        'value'    =>'{assets_url}css/styles.css',
         'area'     =>'scss_main'
     ),
 	'importPaths' => array(	
