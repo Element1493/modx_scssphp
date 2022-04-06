@@ -3,6 +3,7 @@ $options['name'] 			= 'scss';
 $options['nameoptions'] 	= $options['name'].'.';
 $options['corePath'] 		= $modx->getOption($options['nameoptions'].'core_path', $input, $modx->getOption('core_path'));
 $options['componentPath'] 	= $modx->getOption($options['nameoptions'].'component_path', $input, $options['corePath'].'components/'.$options['name'] .'/');
+$options['baseUrl'] 		= $modx->getOption($options['nameoptions'].'base_url', $input, $modx->getOption('base_url'));
 $options['assetsUrl']  		= $modx->getOption($options['nameoptions'].'assets_url', $input, $modx->getOption('assets_url'));
 $options['vendorPath'] 		= $modx->getOption($options['nameoptions'].'vendor_path', $input, $options['componentPath'] . 'vendor/');
 $options['basePath'] 		= $modx->getOption($options['nameoptions'].'base_path', $input, $modx->getOption('base_path'));
@@ -45,7 +46,6 @@ $config['sourceMap'] 	    = $modx->getOption($options['nameoptions'].'sourceMap'
 $config['scssHash'] 	    = $modx->getOption($options['nameoptions'].'scssHash', $input, true);
 
 $config['fileScss'] 		= arrayFiles($config['fileScss']);
-$config['fileCss'] 			= $options['basePath'].$config['fileCss'];
 
 if(!empty($config['fileScss']['result'])){
 	
@@ -74,23 +74,23 @@ if(!empty($config['fileScss']['result'])){
 			if($config['sourceMap']){
 				$compiler->setSourceMap(Compiler::SOURCE_MAP_FILE);	
 				$compiler->setSourceMapOptions(array(
-					'sourceMapURL'		=> $config['fileCss'].'.map',
-					'sourceMapFilename' => $config['fileCss'],
+					'sourceMapURL'		=> $options['baseUrl'].$config['fileCss'].'.map',
+					'sourceMapFilename' => $options['baseUrl'].$config['fileCss'],
 					'sourceMapBasepath' => $options['basePath'],
-					'sourceRoot'		=> '/'
+					'sourceRoot'		=> $options['baseUrl']
 				));
 			}
 			
 			$result	= $compiler->compileString($config['fileScss']['result']);
-			if (!file_exists($config['fileCss'])) {
-				$path = pathinfo($config['fileCss']);
+			if (!file_exists($options['basePath'].$config['fileCss'])) {
+				$path = pathinfo($options['basePath'].$config['fileCss']);
 				if (!mkdir($path['dirname'], 0700, true)) {
 					$modx->log(modX::LOG_LEVEL_ERROR, 'SCSS - Не удалось создать директорию: '.$path['dirname']);
 				}
 			}
-			file_put_contents($config['fileCss'], $result->getCss());
+			file_put_contents($options['basePath'].$config['fileCss'], $result->getCss());
 		/*Source Maps*/
-			if($config['sourceMap']) file_put_contents($config['fileCss'].'.map', $result->getSourceMap());
+			if($config['sourceMap']) file_put_contents($options['basePath'].$config['fileCss'].'.map', $result->getSourceMap());
 		/*SCSS Hash*/
 			if($config['scssHash']){
 				if (!file_exists($options['fileHash'])) {
