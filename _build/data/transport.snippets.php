@@ -29,7 +29,7 @@ $tmp = array(
 			),
 			array(
 				'name' => 'importPaths',
-				'desc' => 'Пути импорта',
+				'desc' => 'Путь к файлам импорта',
 				'type' => 'textfield',
 				'options' => '',
 				'value' => '',

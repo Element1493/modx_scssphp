@@ -11,7 +11,7 @@
 **scss.admin**|Выполнить код для авторизованных|**Да**
 **scss.fileCss**|Путь к файлу CSS|**{assets_path}css/styles.css**
 **scss.fileScss**|Список файлов SCSS|**{assets_path}scss/styles.scss**
-**scss.importPaths**|Пути импорта|
+**scss.importPaths**|Путь к файлам импорта|
 **scss.outputStyle**|Сжимать CSS?|**Да**
 **scss.scssHash**|Hash SCSS|**Да**
 **scss.sourceMap**|Сгенерировать Source Map|**Нет**

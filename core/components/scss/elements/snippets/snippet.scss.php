@@ -3,10 +3,11 @@ $options['name'] 			= 'scss';
 $options['nameoptions'] 	= $options['name'].'.';
 $options['corePath'] 		= $modx->getOption($options['nameoptions'].'core_path', $input, $modx->getOption('core_path'));
 $options['componentPath'] 	= $modx->getOption($options['nameoptions'].'component_path', $input, $options['corePath'].'components/'.$options['name'] .'/');
-$options['baseUrl'] 		= $modx->getOption($options['nameoptions'].'base_url', $input, $modx->getOption('base_url'));
-$options['assetsUrl']  		= $modx->getOption($options['nameoptions'].'assets_url', $input, $modx->getOption('assets_url'));
 $options['vendorPath'] 		= $modx->getOption($options['nameoptions'].'vendor_path', $input, $options['componentPath'] . 'vendor/');
 $options['basePath'] 		= $modx->getOption($options['nameoptions'].'base_path', $input, $modx->getOption('base_path'));
+$options['baseUrl'] 		= $modx->getOption($options['nameoptions'].'base_url', $input, $modx->getOption('base_url'));
+$options['siteUrl'] 		= $modx->getOption($options['nameoptions'].'site_url', $input, $modx->getOption('site_url'));
+$options['assetsUrl']  		= $modx->getOption($options['nameoptions'].'assets_url', $input, $modx->getOption('assets_url'));
 $options['fileHash'] 		= $modx->getOption($options['nameoptions'].'fileHash', $input, $options['corePath'] . 'cache/default/scss/scssphp.php');
 $options['admin'] 			= $modx->getOption($options['nameoptions'].'admin', $input, true);
 
@@ -20,22 +21,14 @@ require_once($options['vendorPath']."scss.inc.php");
 use ScssPhp\ScssPhp\Compiler;
 use ScssPhp\ScssPhp\OutputStyle;
 
-if (!function_exists('arrayFiles')){
-    function arrayFiles($files) {
-		global $options;
-		$arFiles = array();
-		$arError = array();
-		
-		foreach (explode(',', $files) as $file){
-			$file = ltrim($options['basePath'].$file,'/');
-			if (is_file($file) && (strtolower(pathinfo($file,PATHINFO_EXTENSION))=='scss')) {
-				$arFiles[]= file_get_contents($file);
-			}else{
-				$arError[] = $file;
-			}
-		}
-		return array('result' => implode("", $arFiles),'error' => implode(",", $arError));
-	}
+if(!function_exists('parser')){
+    function parser($value){
+        global $modx;
+        $maxIterations = (integer)$modx->getOption('parser_max_iterations', null, 10);
+        $modx->getParser()->processElementTags('', $value, false, false, '[[', ']]', array(), $maxIterations);
+        $modx->getParser()->processElementTags('', $value, true, true, '[[', ']]', array(), $maxIterations);
+        return $value;
+    }
 }
 
 $config['fileScss']		    = $modx->getOption($options['nameoptions'].'fileScss', $input, $options['assetsUrl']. 'scss/styles.scss');
@@ -45,13 +38,24 @@ $config['outputStyle']  	= $modx->getOption($options['nameoptions'].'outputStyle
 $config['sourceMap'] 	    = $modx->getOption($options['nameoptions'].'sourceMap', $input, false);
 $config['scssHash'] 	    = $modx->getOption($options['nameoptions'].'scssHash', $input, true);
 
-$config['fileScss'] 		= arrayFiles($config['fileScss']);
+$resultScss = array();
+foreach (explode(',', $config['fileScss']) as $file){
+    $file = str_replace($options['siteUrl'], "", parser($file));
+	$file = $options['basePath'].ltrim($file,'/');
+	if (file_exists($file) && (strtolower(pathinfo($file,PATHINFO_EXTENSION))=='scss')) {
+		$resultScss[]= file_get_contents($file);
+	}else{
+	    $modx->log(modX::LOG_LEVEL_ERROR, 'SCSS - Не удалось найти файл: ' . $file);
+	}
+}
+$config['fileScss'] = implode("", $resultScss);
 
-if(!empty($config['fileScss']['result'])){
+
+if(!empty($config['fileScss'])){
 	
 /*SCSS Hash*/
 	if($config['scssHash']){
-		$scss_hash = hash('md5',$config['fileScss']['result']);
+		$scss_hash = hash('md5',$config['fileScss']);
 		$is_hash = (!file_exists($options['fileHash']) || ($scss_hash!=file_get_contents($options['fileHash'])))?true:false;
 	}else{
 		$is_hash = true;
@@ -68,7 +72,11 @@ if(!empty($config['fileScss']['result'])){
 			}
 			
 		/*Import Paths*/
-			if($config['importPaths']) $compiler->setImportPaths(arrayFiles($config['importPaths']));
+			if($config['importPaths']){
+			    $importPaths = str_replace($options['siteUrl'], "", parser($config['importPaths']));
+                $importPaths = trim($importPaths,'/');
+            	$compiler->setImportPaths($importPaths.'/');
+			}
 			
 		/*Source Maps*/
 			if($config['sourceMap']){
@@ -81,7 +89,7 @@ if(!empty($config['fileScss']['result'])){
 				));
 			}
 			
-			$result	= $compiler->compileString($config['fileScss']['result']);
+			$result	= $compiler->compileString($config['fileScss']);
 			if (!file_exists($options['basePath'].$config['fileCss'])) {
 				$path = pathinfo($options['basePath'].$config['fileCss']);
 				if (!mkdir($path['dirname'], 0700, true)) {
@@ -102,13 +110,9 @@ if(!empty($config['fileScss']['result'])){
 				file_put_contents($options['fileHash'], $scss_hash);
 			}
 			
-			if(!empty($arScss['error'])) $modx->log(modX::LOG_LEVEL_ERROR, 'SCSS - Не удалось найти файл: ' . $arScss['error']);
 		}catch (\Exception $e){
-			if(!empty($arScss['error'])) $modx->log(modX::LOG_LEVEL_ERROR, 'SCSS - Не удалось найти файл: ' . $arScss['error']);
 			if($error = $e->getMessage()) $modx->log(modX::LOG_LEVEL_ERROR, 'SCSS - Не удалось скомпилировать: ' . $error);
 		}
 	}
-}else{
-	$this->modx->log(modX::LOG_LEVEL_ERROR, 'SCSS - Не удалось найти файл: ' . $arScss['error'], '', 'scss');
 }
 return;
