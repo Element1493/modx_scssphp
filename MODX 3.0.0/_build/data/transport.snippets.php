@@ -9,9 +9,9 @@ $tmp = array(
 			array(
 				'name' => 'admin',
 				'desc' => 'Выполнить код для авторизованных',
-				'type' => 'textfield',
+				'type' => 'combo-boolean',
 				'options' => '',
-				'value' => '{assets_url}scss/styles.scss',
+				'value' => true,
 			),
 			array(
 				'name' => 'fileScss',
@@ -39,14 +39,14 @@ $tmp = array(
 				'desc' => 'Сжать выходной файл CSS',
 				'type' => 'combo-boolean',
 				'options' => '',
-				'value' => false,
+				'value' => true,
 			),
 			array(
 				'name' => 'scssHash',
 				'desc' => 'Hash SCSS',
 				'type' => 'combo-boolean',
 				'options' => '',
-				'value' => false,
+				'value' => true,
 			),
 			array(
 				'name' => 'sourceMap',
