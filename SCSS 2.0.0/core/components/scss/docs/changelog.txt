@@ -1,5 +1,0 @@
-Changelog for SCSS.
-
-2.0.0-pl
-==============
-- Релиз для MODX 3
