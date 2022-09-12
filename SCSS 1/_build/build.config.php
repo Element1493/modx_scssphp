@@ -3,7 +3,7 @@
 const PKG_NAME = 'SCSS';
 const PKG_NAME_LOWER = 'scss';
 
-const PKG_VERSION = '1.0.1';
+const PKG_VERSION = '1.0.2';
 const PKG_RELEASE = 'pl';
 const PKG_AUTO_INSTALL = false;
 const PKG_NAMESPACE_PATH = '{core_path}components/' . PKG_NAME_LOWER . '/';
@@ -34,7 +34,7 @@ const BUILD_SETTING_UPDATE = false;
 //const BUILD_CHUNK_UPDATE = false;
 
 const BUILD_SNIPPET_UPDATE = true;
-//const BUILD_PLUGIN_UPDATE = true;
+const BUILD_PLUGIN_UPDATE = true;
 //const BUILD_EVENT_UPDATE = true;
 //const BUILD_POLICY_UPDATE = true;
 //const BUILD_POLICY_TEMPLATE_UPDATE = true;
@@ -42,7 +42,7 @@ const BUILD_SNIPPET_UPDATE = true;
 
 //const BUILD_CHUNK_STATIC = false;
 const BUILD_SNIPPET_STATIC = false;
-//const BUILD_PLUGIN_STATIC = false;
+const BUILD_PLUGIN_STATIC = false;
 
 $BUILD_RESOLVERS = [
     //'parser',
