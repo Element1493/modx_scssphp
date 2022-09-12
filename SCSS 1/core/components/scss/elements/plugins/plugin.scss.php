@@ -10,7 +10,7 @@ switch($eventName) {
         $config['scssHash'] 	    = $modx->getOption($options['nameoptions'].'scssHash', null, true);
         
         if($config['scssHash']){
-            if(!file_exists($options['fileHash']) || ($scss_hash!=file_get_contents($options['fileHash']))){
+            if(file_exists($options['fileHash'])){
                 unlink($options['fileHash']);
             }
         }
