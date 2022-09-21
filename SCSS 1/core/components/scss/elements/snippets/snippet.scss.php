@@ -137,7 +137,8 @@ if(!empty($config['fileScss'])){
     			    if (in_array("ie", $arVendors)) $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\IE::class;
     			    if (in_array("webkit", $arVendors)) $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\Webkit::class;
     			    if (in_array("mozilla", $arVendors)) $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\Mozilla::class;
-    			    
+    			    if (in_array("opera", $arVendors)) $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\Opera::class;
+					
     			    $autoprefixer->setVendors($vendors);
 			    }
 			    if($config['outputStyle']) {
