@@ -2,8 +2,8 @@
 $_lang = array_merge(array (
   'area_scss_main' 						=> 'Основные',
   'area_scss_autoprefixer' 				=> 'Автопрефиксер',
-  'setting_scss.autoprefixer' 			=> 'Скомпилировать SCSS с Автопрефиксером',
-  'setting_scss.autoprefixer_desc' 		=> 'Автопрефиксер',
+  'setting_scss.autoprefixer' 			=> 'Автопрефиксер',
+  'setting_scss.autoprefixer_desc' 		=> 'Скомпилировать SCSS с Автопрефиксером',
   'setting_scss.autoprefixerVendor' 	=> 'Список префиксoв',
   'setting_scss.autoprefixerVendor_desc'=> 'Список префиксoв которые будут использоваться, прописываем через запятую.[IE,Webkit,Mozilla,Opera]',
   'setting_scss.admin' 					=> 'Выполнить код для авторизованных',
