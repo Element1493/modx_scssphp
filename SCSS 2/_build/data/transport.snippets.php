@@ -7,6 +7,20 @@ $tmp = array(
 		'name'=> 'scss',
 		'properties' => array(
 			array(
+				'name' => 'autoprefixer',
+				'desc' => 'Автопрефиксер',
+				'type' => 'combo-boolean',
+				'options' => '',
+				'value' => true,
+			),
+			array(
+				'name' => 'autoprefixerVendor',
+				'desc' => 'Список префиксoв',
+				'type' => 'textfield',
+				'options' => '',
+				'value' => 'IE,Webkit,Mozilla',
+			),
+			array(
 				'name' => 'admin',
 				'desc' => 'Выполнить код для авторизованных',
 				'type' => 'combo-boolean',

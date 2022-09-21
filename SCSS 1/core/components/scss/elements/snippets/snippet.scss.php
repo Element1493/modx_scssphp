@@ -53,17 +53,20 @@ if($options['admin']){
 	if(!$isAuth && !$modx->user->isMember(array('Administrator'))) return;
 }
 
-require_once($options['vendorPath']."scss.inc.php");
+require_once($options['vendorPath'].'autoload.php' );
 
 use ScssPhp\ScssPhp\Compiler;
 use ScssPhp\ScssPhp\OutputStyle;
+use Padaliyajay\PHPAutoprefixer\Autoprefixer;
 
-$config['fileScss']		    = $modx->getOption($options['nameoptions'].'fileScss', $input, $options['assetsUrl']. 'scss/styles.scss');
-$config['fileCss'] 		    = $modx->getOption($options['nameoptions'].'fileCss', $input, $options['assetsUrl']. 'css/styles.css');
-$config['importPaths'] 	    = $modx->getOption($options['nameoptions'].'importPaths', $input, '');
-$config['outputStyle']  	= $modx->getOption($options['nameoptions'].'outputStyle', $input, false);
-$config['sourceMap'] 	    = $modx->getOption($options['nameoptions'].'sourceMap', $input, false);
-$config['scssHash'] 	    = $modx->getOption($options['nameoptions'].'scssHash', $input, true);
+$config['fileScss']		        = $modx->getOption($options['nameoptions'].'fileScss', $input, $options['assetsUrl']. 'scss/styles.scss');
+$config['fileCss'] 		        = $modx->getOption($options['nameoptions'].'fileCss', $input, $options['assetsUrl']. 'css/styles.css');
+$config['importPaths'] 	        = $modx->getOption($options['nameoptions'].'importPaths', $input, '');
+$config['outputStyle']  	    = $modx->getOption($options['nameoptions'].'outputStyle', $input, false);
+$config['sourceMap'] 	        = $modx->getOption($options['nameoptions'].'sourceMap', $input, false);
+$config['scssHash'] 	        = $modx->getOption($options['nameoptions'].'scssHash', $input, true);
+$config['autoprefixer'] 	    = $modx->getOption($options['nameoptions'].'autoprefixer', $input, true);
+$config['autoprefixerVendor']   = $modx->getOption($options['nameoptions'].'autoprefixerVendor', $input, 'IE,Webkit,Mozilla');
 
 $pathUrlScss = pathinfo($config['fileScss']);
 $dirUrlScss = $pathUrlScss['dirname'];
@@ -124,8 +127,27 @@ if(!empty($config['fileScss'])){
 			}
 			
 			$result	= $compiler->compileString($config['fileScss']);
+			$css	= $result->getCss();
 			
-			file_put_contents($filePathCss, $result->getCss());
+			if($config['autoprefixer']){
+			    $autoprefixer = new Autoprefixer($css);
+			    if($config['autoprefixerVendor']){
+			        $vendors = array();
+    			    $arVendors = explode(",", strtolower($config['autoprefixerVendor']));
+    			    if (in_array("ie", $arVendors)) $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\IE::class;
+    			    if (in_array("webkit", $arVendors)) $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\Webkit::class;
+    			    if (in_array("mozilla", $arVendors)) $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\Mozilla::class;
+    			    
+    			    $autoprefixer->setVendors($vendors);
+			    }
+			    if($config['outputStyle']) {
+                    $css = $autoprefixer->compile(false);
+			    }else{
+			        $css = $autoprefixer->compile();
+			    }
+			}
+			
+			file_put_contents($filePathCss, $css);
 		/*Source Maps*/
 			if($config['sourceMap']) file_put_contents($filePathCss.'.map', $result->getSourceMap());
 		/*SCSS Hash*/

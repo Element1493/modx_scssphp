@@ -3,6 +3,16 @@
 $settings = array();
 
 $tmp = array(
+	'autoprefixer' => array(	
+        'xtype'    =>'combo-boolean',
+        'value'    =>true,
+        'area'     =>'scss_autoprefixer'
+    ),
+	'autoprefixerVendor' => array(	
+        'xtype'    =>'textfield',
+        'value'    =>'IE,Webkit,Mozilla',
+        'area'     =>'scss_autoprefixer'
+    ),
 	'admin' => array(	
         'xtype'    =>'combo-boolean',
         'value'    =>true,

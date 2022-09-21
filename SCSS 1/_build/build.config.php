@@ -3,7 +3,7 @@
 const PKG_NAME = 'SCSS';
 const PKG_NAME_LOWER = 'scss';
 
-const PKG_VERSION = '1.0.2';
+const PKG_VERSION = '1.0.3';
 const PKG_RELEASE = 'pl';
 const PKG_AUTO_INSTALL = false;
 const PKG_NAMESPACE_PATH = '{core_path}components/' . PKG_NAME_LOWER . '/';
