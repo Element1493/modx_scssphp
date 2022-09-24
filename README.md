@@ -1,14 +1,14 @@
 # modx_scssphp
 ![version](https://img.shields.io/badge/version-1.0.3-orange "Version")
-![dle](https://img.shields.io/badge/MODX-2.8%3C-green "MODX")
+![dle](https://img.shields.io/badge/MODX-2.8.3%3C-green "MODX")
 [![MIT License](https://img.shields.io/badge/license-MIT-blue "MIT License")](https://github.com/Element1493/dle_scssphp/blob/main/LICENSE)
 
 Небольшой компонент, который автоматически компилирует файлы SCSS в файл CSS c помощью библиотеки [SCSSPHP](https://github.com/scssphp/scssphp) и [PHP-AUTOPREFIXER](https://github.com/scssphp/scssphp) для Автопрефиксера.
 
 ### Версии:
-**SCSS 1** (для MODX 2.8)
+**SCSS 1** (для MODX 2.8.3<)
 
-**SCSS 2** (для MODX 3.0)
+**SCSS 2** (для MODX 3.0.0<)
 
 ### Системные настройки:
 Ключ| Название|По умолчанию
