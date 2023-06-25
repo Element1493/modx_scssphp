@@ -1,4 +1,12 @@
 <?php
+if(!function_exists('deleteDomain')){
+    function deleteDomain($INPUT){
+    	$RESULT = str_replace(array("https://","http://",$_SERVER['HTTP_HOST']), "", $INPUT);
+    	$RESULT = trim($RESULT,'/');
+    	return $RESULT;
+    }
+}
+
 if(!function_exists('parser')){
     function parser($value){
         global $modx;
@@ -14,44 +22,130 @@ if(!function_exists('createPath')){
         if (!file_exists($filename)) {
         	$path = pathinfo($filename);
         	if (!file_exists($path['dirname'])){
-        	    if(!mkdir($path['dirname'],$permissions, true)) $modx->log(modX::LOG_LEVEL_ERROR, 'SCSS - Не удалось создать директорию: '.$path['dirname']);
+        	    if(!mkdir($path['dirname'],$permissions, true)) $modx->log(1, 'SCSS - Не удалось создать директорию: '.$path['dirname']);
         	}
         }
     }
 }
-if(!function_exists('mergeFile')){
-    function mergeFile($fileScss,$siteUrl,$basePath){
+if(!function_exists('scssPaths')){
+    function scssPaths($options){
         global $modx;
-        $resultScss = array();
-        foreach (explode(',', $fileScss) as $file){
-            $file = str_replace($siteUrl, "", parser($file));
-        	$file = $basePath.ltrim($file,'/');
-        	if (file_exists($file) && (strtolower(pathinfo($file,PATHINFO_EXTENSION))=='scss')) {
-        		$resultScss[]= file_get_contents($file);
+        $RESULT = array();
+        foreach (explode(',', $options['fileScss']) as $FILE){
+            $FILE = str_replace($options['siteUrl'], "", parser($FILE));
+        	$FILE = $options['basePath'].'/'.deleteDomain($FILE);
+        	if (file_exists($FILE) && (strtolower(pathinfo($FILE,PATHINFO_EXTENSION))=='scss')) {
+        		$result[]= file_get_contents($FILE);
         	}else{
-        	    $modx->log(modX::LOG_LEVEL_ERROR, 'SCSS - Не удалось найти файл: ' . $file);
+        	    $modx->log(1, 'SCSS - Не удалось найти файл: ' . $FILE);
         	}
         }
-        return implode("", $resultScss);
+        return implode("", $RESULT);
+    }
+}
+if(!function_exists('importPaths')){
+    function importPaths($options){
+        global $modx;
+        $RESULT = array();
+		if(!empty($options['importPaths'])){
+		    $options['importPaths'] = explode(",", $options['importPaths']);
+			foreach ($options['importPaths'] as $FILE){
+			    $FILE = str_replace($options['siteUrl'], "", parser($FILE));
+        	    $FILE = $options['basePath'].'/'.deleteDomain($FILE);
+				if(file_exists($FILE)){
+					$RESULT[] = $FILE;
+				}else{
+				    $modx->log(1,'SCSS - Не удалось найти путь к импорту: '.$FILE);
+				}
+			}
+		}else{
+			if(file_exists($options['basePath'].trim($options['dirUrlScss'],'/'))){
+    			$RESULT[] = $importPaths.'/';
+			}
+		}
+		return $RESULT;
+	}
+}
+if(!function_exists('isHASH')){
+    function isHASH($options){
+        if($options['scssHash']){
+    		return (!file_exists($options['fileHash']) || ( hash('md5',$options['fileScss']) != file_get_contents($options['fileHash'])) )?true:false;
+    	}else{
+    		return true;
+    	}
+    }
+}
+if(!function_exists('setHASH')){
+    function setHASH($options){
+        if($options['scssHash']){
+		    createPath($options['fileHash']);
+			file_put_contents($options['fileHash'], hash('md5',$options['fileScss']));
+			return true;
+		}else{
+		    return false;
+		}
+    }
+}
+if(!function_exists('autoprefixer')){
+    function autoprefixer($style,$options){
+        global $modx;
+        if($options['autoprefixer'] && !empty($style)){
+            try{
+    		    $autoprefixer = new Autoprefixer($style);
+    		    if($options['autoprefixerVendor']){
+    		        $vendors = array();
+    			    $arVendors = explode(",", strtolower($options['autoprefixerVendor']));
+    			    if (in_array("ie", $arVendors))         $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\IE::class;
+    			    if (in_array("webkit", $arVendors))     $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\Webkit::class;
+    			    if (in_array("mozilla", $arVendors))    $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\Mozilla::class;
+    			    if (in_array("opera", $arVendors))      $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\Opera::class;
+    				
+    			    $autoprefixer->setVendors($vendors);
+    		    }
+    		    return ($options['outputStyle'])?$autoprefixer->compile(false):$autoprefixer->compile();
+            }catch(\Exception $e){
+                $modx->log(1, 'SCSS - Не удалось добавить префиксов: '.$e);
+            }
+		}
+		return $style;
     }
 }
 
-$options['name'] 			= 'scss';
-$options['nameoptions'] 	= $options['name'].'.';
-$options['corePath'] 		= $modx->getOption($options['nameoptions'].'core_path', $input, $modx->getOption('core_path'));
-$options['componentPath'] 	= $modx->getOption($options['nameoptions'].'component_path', $input, $options['corePath'].'components/'.$options['name'] .'/');
-$options['vendorPath'] 		= $modx->getOption($options['nameoptions'].'vendor_path', $input, $options['componentPath'] . 'vendor/');
-$options['basePath'] 		= $modx->getOption($options['nameoptions'].'base_path', $input, $modx->getOption('base_path'));
-$options['baseUrl'] 		= $modx->getOption($options['nameoptions'].'base_url', $input, $modx->getOption('base_url'));
-$options['siteUrl'] 		= $modx->getOption($options['nameoptions'].'site_url', $input, $modx->getOption('site_url'));
-$options['assetsUrl']  		= $modx->getOption($options['nameoptions'].'assets_url', $input, $modx->getOption('assets_url'));
-$options['fileHash'] 		= $modx->getOption($options['nameoptions'].'fileHash', $input, $options['corePath'] . 'cache/default/scss/scssphp.php');
-$options['admin'] 			= $modx->getOption($options['nameoptions'].'admin', $input, true);
+$options['name'] 			            = 'scss';
+$options['nameoptions'] 	            = $options['name'].'.';
 
-if($options['admin']){
-    $isAuth = $modx->user->isAuthenticated('mgr') && $modx->user->isAuthenticated($modx->context->key);
-	if(!$isAuth && !$modx->user->isMember(array('Administrator'))) return;
-}
+$options['corePath']                    = (!empty($scriptProperties['core_path']))?$scriptProperties['core_path']:$modx->getOption($options['nameoptions'].'core_path', null, $modx->getOption('core_path'));
+$options['componentPath'] 	            = (!empty($scriptProperties['component_path']))?$scriptProperties['component_path']:$modx->getOption($options['nameoptions'].'component_path', null, $options['corePath'].'components/'.$options['name'] .'/');
+$options['vendorPath'] 		            = (!empty($scriptProperties['vendor_path']))?$scriptProperties['vendor_path']:$modx->getOption($options['nameoptions'].'vendor_path', null, $options['componentPath'] . 'vendor/');
+$options['basePath'] 		            = (!empty($scriptProperties['base_path']))?$scriptProperties['base_path']:$modx->getOption($options['nameoptions'].'base_path', null, $modx->getOption('base_path'));
+$options['baseUrl'] 		            = (!empty($scriptProperties['base_url']))?$scriptProperties['base_url']:$modx->getOption($options['nameoptions'].'base_url', null, $modx->getOption('base_url'));
+$options['siteUrl'] 		            = (!empty($scriptProperties['site_url']))?$scriptProperties['site_url']:$modx->getOption($options['nameoptions'].'site_url', null, $modx->getOption('site_url'));
+$options['assetsUrl']  		            = (!empty($scriptProperties['assets_url']))?$scriptProperties['assets_url']:$modx->getOption($options['nameoptions'].'assets_url', null, $modx->getOption('assets_url'));
+$options['admin'] 			            = (!empty($scriptProperties['admin']))?$scriptProperties['admin']:$modx->getOption($options['nameoptions'].'admin', null, true);
+$options['fileScss']                    = (!empty($scriptProperties['fileScss']))?$scriptProperties['fileScss']:$modx->getOption($options['nameoptions'].'fileScss', null, $options['assetsUrl']. 'scss/styles.scss',true);
+$options['fileCss']                     = (!empty($scriptProperties['fileCss']))?$scriptProperties['fileCss']:$modx->getOption($options['nameoptions'].'fileCss', null, $options['assetsUrl']. 'css/styles.css',true);
+$options['importPaths']                 = (!empty($scriptProperties['importPaths']))?$scriptProperties['importPaths']:$modx->getOption($options['nameoptions'].'importPaths', null, '', true);
+$options['outputStyle']  	            = (!empty($scriptProperties['outputStyle']))?$scriptProperties['outputStyle']:$modx->getOption($options['nameoptions'].'outputStyle', null, false);
+$options['sourceMap'] 	                = (!empty($scriptProperties['sourceMap']))?$scriptProperties['sourceMap']:$modx->getOption($options['nameoptions'].'sourceMap', null, false);
+$options['scssHash'] 	                = (!empty($scriptProperties['scssHash']))?$scriptProperties['scssHash']:$modx->getOption($options['nameoptions'].'scssHash', null, true);
+$options['autoprefixer'] 	            = (!empty($scriptProperties['autoprefixer']))?$scriptProperties['autoprefixer']:$modx->getOption($options['nameoptions'].'autoprefixer', null, true);
+$options['autoprefixerVendor']          = (!empty($scriptProperties['autoprefixerVendor']))?$scriptProperties['autoprefixerVendor']:$modx->getOption($options['nameoptions'].'autoprefixerVendor', null, 'IE,Webkit,Mozilla');
+$options['fileHash']                    = (!empty($scriptProperties['fileHash']))?$scriptProperties['fileHash']:$modx->getOption($options['nameoptions'].'fileHash', null, $options['corePath'] . 'cache/scss/'.$options['fileScss'].'.txt');
+
+$options['pathUrlScss']                 = pathinfo($options['fileScss']);
+$options['dirUrlScss']                  = $options['pathUrlScss']['dirname'];
+$options['pathUrlCss']                  = pathinfo($options['fileCss']);
+$options['dirUrlCss']                   = $options['pathUrlCss']['dirname'];
+$options['filePathCss']                 = $options['basePath'].$options['fileCss'];
+$options['fileUrlCss']                  = $options['baseUrl'].$options['fileCss'];
+
+$options['fileScss']                    = scssPaths($options);
+
+$options['map']['sourceMapURL']		    = $options['fileUrlCss'].'.map';
+$options['map']['sourceMapFilename']    = $options['fileUrlCss'];
+$options['map']['sourceMapBasepath']    = $options['basePath'];
+$options['map']['sourceRoot']           = $options['baseUrl'];
+
 
 require_once($options['vendorPath'].'autoload.php' );
 
@@ -59,107 +153,41 @@ use ScssPhp\ScssPhp\Compiler;
 use ScssPhp\ScssPhp\OutputStyle;
 use Padaliyajay\PHPAutoprefixer\Autoprefixer;
 
-$config['fileScss']		        = $modx->getOption($options['nameoptions'].'fileScss', $input, $options['assetsUrl']. 'scss/styles.scss');
-$config['fileCss'] 		        = $modx->getOption($options['nameoptions'].'fileCss', $input, $options['assetsUrl']. 'css/styles.css');
-$config['importPaths'] 	        = $modx->getOption($options['nameoptions'].'importPaths', $input, '');
-$config['outputStyle']  	    = $modx->getOption($options['nameoptions'].'outputStyle', $input, false);
-$config['sourceMap'] 	        = $modx->getOption($options['nameoptions'].'sourceMap', $input, false);
-$config['scssHash'] 	        = $modx->getOption($options['nameoptions'].'scssHash', $input, true);
-$config['autoprefixer'] 	    = $modx->getOption($options['nameoptions'].'autoprefixer', $input, true);
-$config['autoprefixerVendor']   = $modx->getOption($options['nameoptions'].'autoprefixerVendor', $input, 'IE,Webkit,Mozilla');
+if($options['admin']){
+    $isAuth = $modx->user->isAuthenticated('mgr') && $modx->user->isAuthenticated($modx->context->key);
+	if(!$isAuth && !$modx->user->isMember(array('Administrator'))) return;
+}
 
-$pathUrlScss = pathinfo($config['fileScss']);
-$dirUrlScss = $pathUrlScss['dirname'];
-
-$pathUrlCss = pathinfo($config['fileCss']);
-$dirUrlCss = $pathUrlCss['dirname'];
-
-$filePathCss = $options['basePath'].$config['fileCss'];
-$fileUrlCss = $options['baseUrl'].$config['fileCss'];
-
-$config['fileScss'] = mergeFile($config['fileScss'],$options['siteUrl'],$options['basePath']);
-
-if(!empty($config['fileScss'])){
-	
-/*SCSS Hash*/
-	if($config['scssHash']){
-		$scss_hash = hash('md5',$config['fileScss']);
-		$is_hash = (!file_exists($options['fileHash']) || ($scss_hash!=file_get_contents($options['fileHash'])))?true:false;
-	}else{
-		$is_hash = true;
-	}
-	if ($is_hash || !file_exists($filePathCss)){
+if(!empty($options['fileScss'])){
+	if (isHASH($options) || !file_exists($options['filePathCss'])){
 		try{
 			$compiler = new Compiler();
-			
-			createPath($filePathCss);
-			
-		/*Output Formatting*/
-			if($config['outputStyle']) {
+			createPath($options['filePathCss']);
+			if($options['outputStyle']) {
 				$compiler->setOutputStyle(OutputStyle::COMPRESSED);
 			}else{
 				$compiler->setOutputStyle(OutputStyle::EXPANDED);
 			}
 			
-		/*Import Paths*/
-			if($config['importPaths']){
-			    $importPaths = str_replace($options['siteUrl'], "", parser($config['importPaths']));
-			}else{
-			    $importPaths = $dirUrlScss;
-			}
-			$importPaths = trim($importPaths,'/');
-
-			if(file_exists($options['basePath'].$importPaths)){
-    			$compiler->setImportPaths($importPaths.'/');
-			}else{
-			    $modx->log(modX::LOG_LEVEL_ERROR, 'SCSS - Путь к файлам импорта отсутствует: '.$importPaths);
-			}
+			$compiler->setImportPaths(importPaths($options));
 			
-		/*Source Maps*/
-			if($config['sourceMap']){
+			if($options['sourceMap']){
 				$compiler->setSourceMap(Compiler::SOURCE_MAP_FILE);	
-				$compiler->setSourceMapOptions(array(
-					'sourceMapURL'		=> $fileUrlCss.'.map',
-					'sourceMapFilename' => $fileUrlCss,
-					'sourceMapBasepath' => $options['basePath'],
-					'sourceRoot'		=> $options['baseUrl']
-				));
+				$compiler->setSourceMapOptions($options['map']);
 			}
 			
-			$result	= $compiler->compileString($config['fileScss']);
-			$css	= $result->getCss();
+			$result	= $compiler->compileString($options['fileScss']);
+			$css = autoprefixer($result->getCss(),$options);
 			
-			if($config['autoprefixer']){
-			    $autoprefixer = new Autoprefixer($css);
-			    if($config['autoprefixerVendor']){
-			        $vendors = array();
-    			    $arVendors = explode(",", strtolower($config['autoprefixerVendor']));
-    			    if (in_array("ie", $arVendors)) $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\IE::class;
-    			    if (in_array("webkit", $arVendors)) $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\Webkit::class;
-    			    if (in_array("mozilla", $arVendors)) $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\Mozilla::class;
-    			    if (in_array("opera", $arVendors)) $vendors[] = \Padaliyajay\PHPAutoprefixer\Vendor\Opera::class;
-					
-    			    $autoprefixer->setVendors($vendors);
-			    }
-			    if($config['outputStyle']) {
-                    $css = $autoprefixer->compile(false);
-			    }else{
-			        $css = $autoprefixer->compile();
-			    }
-			}
-			
-			file_put_contents($filePathCss, $css);
-		/*Source Maps*/
-			if($config['sourceMap']) file_put_contents($filePathCss.'.map', $result->getSourceMap());
-		/*SCSS Hash*/
-			if($config['scssHash']){
-			    createPath($options['fileHash']);
-				file_put_contents($options['fileHash'], $scss_hash);
-			}
+			file_put_contents($options['filePathCss'], $css);
+			if($options['sourceMap']) file_put_contents($options['filePathCss'].'.map', $result->getSourceMap());
+
+			setHASH($options);
 			
 		}catch (\Exception $e){
 			if($error = $e->getMessage()) $modx->log(modX::LOG_LEVEL_ERROR, 'SCSS - Не удалось скомпилировать: ' . $error);
 		}
 	}
 }
+
 return;
