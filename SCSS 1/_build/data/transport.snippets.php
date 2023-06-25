@@ -11,7 +11,7 @@ $tmp = array(
 				'desc' => 'Автопрефиксер',
 				'type' => 'combo-boolean',
 				'options' => '',
-				'value' => true,
+				'value' => '',
 			),
 			array(
 				'name' => 'autoprefixerVendor',
@@ -25,21 +25,21 @@ $tmp = array(
 				'desc' => 'Выполнить код для авторизованных',
 				'type' => 'combo-boolean',
 				'options' => '',
-				'value' => true,
+				'value' => '',
 			),
 			array(
 				'name' => 'fileScss',
 				'desc' => 'Список файлов SCSS',
 				'type' => 'textfield',
 				'options' => '',
-				'value' => '{assets_url}scss/styles.scss',
+				'value' => '',
 			),
 			array(
 				'name' => 'fileCss',
 				'desc' => 'Путь к файлу CSS',
 				'type' => 'textfield',
 				'options' => '',
-				'value' => '{assets_url}css/styles.css',
+				'value' => '',
 			),
 			array(
 				'name' => 'importPaths',
@@ -53,21 +53,21 @@ $tmp = array(
 				'desc' => 'Сжать выходной файл CSS',
 				'type' => 'combo-boolean',
 				'options' => '',
-				'value' => true,
+				'value' => '',
 			),
 			array(
 				'name' => 'scssHash',
 				'desc' => 'Hash SCSS',
 				'type' => 'combo-boolean',
 				'options' => '',
-				'value' => true,
+				'value' => '',
 			),
 			array(
 				'name' => 'sourceMap',
 				'desc' => 'Сгенерировать Source Map',
 				'type' => 'combo-boolean',
 				'options' => '',
-				'value' => false,
+				'value' => '',
 			)
 		)
 	)
