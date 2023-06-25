@@ -10,26 +10,46 @@
 
 **SCSS 2** (для MODX 3.0.3<)
 
-### Системные настройки:
+### Параметры:
 Ключ| Название|По умолчанию
 -|-|-
-**scss.admin**|Выполнить код для авторизованных|**Да**
-**scss.fileCss**|Путь к файлу CSS|**{assets_path}css/styles.css**
-**scss.fileScss**|Список файлов SCSS|**{assets_path}scss/styles.scss**
-**scss.importPaths**|Путь к файлам импорта|
-**scss.outputStyle**|Сжимать CSS?|**Да**
-**scss.scssHash**|Hash SCSS|**Да**
-**scss.sourceMap**|Сгенерировать Source Map|**Нет**
-**scss.autoprefixer**|Автопрефиксер|**Да**
-**scss.autoprefixerVendor**|Список префиксoв|**IE,Webkit,Mozilla**
+**admin**|Выполнить код для авторизованных|**1**
+**fileCss**|Путь к файлу CSS|**{assets_path}css/styles.css**
+**fileScss**|Список файлов SCSS|**{assets_path}scss/styles.scss**
+**importPaths**|Путь к файлам импорта|
+**outputStyle**|Сжимать CSS?|**1**
+**scssHash**|Hash SCSS|**1**
+**sourceMap**|Сгенерировать Source Map|**0**
+**autoprefixer**|Автопрефиксер|**1**
+**autoprefixerVendor**|Список префиксoв|**IE,Webkit,Mozilla**
 
 ### Инструкция:
 Для работы данного компонента достаточно вставить сниппет в шаблон:
 ```html
 <!--MODX-->
-[[!SCSS]]
+[[!SCSS?
+&admin=`1`
+&fileCss=`{assets_path}css/styles.css`
+&fileScss=`{assets_path}scss/styles.scss`
+&importPaths=``
+&outputStyle=`1`
+&scssHash=`1`
+&sourceMap=`0`
+&autoprefixer=`1`
+&autoprefixerVendor=`IE,Webkit,Mozilla`
+]]
 <!--Fenom-->
-{'!SCSS'|snippet}
+{'!SCSS'|snippet:[
+'admin'=>'1',
+'fileCss'=>'{assets_path}css/styles.css',
+'fileScss'=>'{assets_path}scss/styles.scss',
+'importPaths'=>'',
+'outputStyle'=>'1',
+'scssHash'=>'1',
+'sourceMap'=>'0',
+'autoprefixer'=>'1',
+'autoprefixerVendor'=>'IE,Webkit,Mozilla'
+]}
 ```
 
 ## Ссылки:
