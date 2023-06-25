@@ -97,7 +97,7 @@ if(!function_exists('importPaths')){
 			}
 		}else{
 			if(file_exists($options['basePath'].trim($options['dirUrlScss'],'/'))){
-    			$RESULT[] = $importPaths.'/';
+    			$RESULT[] = $options['basePath'].trim($options['dirUrlScss'],'/');
 			}
 		}
 		return $RESULT;
@@ -166,7 +166,6 @@ if(scssPaths($options)){
 			}
 			
 			$compiler->setImportPaths(importPaths($options));
-			
 			if($options['sourceMap']){
 				$compiler->setSourceMap(Compiler::SOURCE_MAP_FILE);	
 				$compiler->setSourceMapOptions($options['map']);
