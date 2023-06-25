@@ -120,7 +120,7 @@ foreach ($BUILD_RESOLVERS as $resolver) {
 $builder->putVehicle($vehicle);
 
 // load system settings
-if (defined('BUILD_SETTING_UPDATE')) {
+/*if (defined('BUILD_SETTING_UPDATE')) {
     $settings = include $sources['data'] . 'transport.settings.php';
     if (!is_array($settings)) {
         $modx->log(modX::LOG_LEVEL_ERROR, 'Could not package in settings.');
@@ -137,7 +137,7 @@ if (defined('BUILD_SETTING_UPDATE')) {
         $modx->log(modX::LOG_LEVEL_INFO, 'Packaged in ' . count($settings) . ' System Settings.');
     }
     unset($settings, $setting, $attributes);
-}
+}*/
 
 // load plugins events
 if (defined('BUILD_EVENT_UPDATE')) {
@@ -163,8 +163,8 @@ $builder->setPackageAttributes([
     'license' => file_get_contents($sources['docs'] . 'license.txt'),
     'readme' => file_get_contents($sources['docs'] . 'readme.txt'),
     'requires' => [
-        'php' => '>=7.4.0',
-        'modx' => '>=3.0.0',
+        'php' => '>=8.0.0',
+        'modx' => '>=3.0.3',
     ],
 ]);
 $modx->log(modX::LOG_LEVEL_INFO, 'Added package attributes and setup options.');

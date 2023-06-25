@@ -30,7 +30,7 @@ const MODX_ASSETS_URL = MODX_BASE_URL . 'assets/';
 /* define build options */
 //const BUILD_MENU_UPDATE = false;
 //const BUILD_ACTION_UPDATE = false;
-const BUILD_SETTING_UPDATE = true;
+//const BUILD_SETTING_UPDATE = false;
 //const BUILD_CHUNK_UPDATE = false;
 
 const BUILD_SNIPPET_UPDATE = true;
