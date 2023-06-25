@@ -1,11 +1,44 @@
 <?php
-if(!function_exists('deleteDomain')){
-    function deleteDomain($INPUT){
-    	$RESULT = str_replace(array("https://","http://",$_SERVER['HTTP_HOST']), "", $INPUT);
-    	$RESULT = trim($RESULT,'/');
-    	return $RESULT;
-    }
-}
+
+$options['name'] 			            = 'scss';
+$options['nameoptions'] 	            = $options['name'].'.';
+
+$options['corePath']                    = (!empty($scriptProperties['core_path']))?$scriptProperties['core_path']:$modx->getOption($options['nameoptions'].'core_path', null, $modx->getOption('core_path'));
+$options['componentPath'] 	            = (!empty($scriptProperties['component_path']))?$scriptProperties['component_path']:$modx->getOption($options['nameoptions'].'component_path', null, $options['corePath'].'components/'.$options['name'] .'/');
+$options['vendorPath'] 		            = (!empty($scriptProperties['vendor_path']))?$scriptProperties['vendor_path']:$modx->getOption($options['nameoptions'].'vendor_path', null, $options['componentPath'] . 'vendor/');
+$options['basePath'] 		            = (!empty($scriptProperties['base_path']))?$scriptProperties['base_path']:$modx->getOption($options['nameoptions'].'base_path', null, $modx->getOption('base_path'));
+$options['baseUrl'] 		            = (!empty($scriptProperties['base_url']))?$scriptProperties['base_url']:$modx->getOption($options['nameoptions'].'base_url', null, $modx->getOption('base_url'));
+$options['siteUrl'] 		            = (!empty($scriptProperties['site_url']))?$scriptProperties['site_url']:$modx->getOption($options['nameoptions'].'site_url', null, $modx->getOption('site_url'));
+$options['assetsUrl']  		            = (!empty($scriptProperties['assets_url']))?$scriptProperties['assets_url']:$modx->getOption($options['nameoptions'].'assets_url', null, $modx->getOption('assets_url'));
+$options['admin'] 			            = (!empty($scriptProperties['admin']))?$scriptProperties['admin']:$modx->getOption($options['nameoptions'].'admin', null, true);
+$options['fileScss']                    = (!empty($scriptProperties['fileScss']))?$scriptProperties['fileScss']:$modx->getOption($options['nameoptions'].'fileScss', null, $options['assetsUrl']. 'scss/styles.scss',true);
+$options['fileCss']                     = (!empty($scriptProperties['fileCss']))?$scriptProperties['fileCss']:$modx->getOption($options['nameoptions'].'fileCss', null, $options['assetsUrl']. 'css/styles.css',true);
+$options['importPaths']                 = (!empty($scriptProperties['importPaths']))?$scriptProperties['importPaths']:$modx->getOption($options['nameoptions'].'importPaths', null, '', true);
+$options['outputStyle']  	            = (!empty($scriptProperties['outputStyle']))?$scriptProperties['outputStyle']:$modx->getOption($options['nameoptions'].'outputStyle', null, false);
+$options['sourceMap'] 	                = (!empty($scriptProperties['sourceMap']))?$scriptProperties['sourceMap']:$modx->getOption($options['nameoptions'].'sourceMap', null, false);
+$options['scssHash'] 	                = (!empty($scriptProperties['scssHash']))?$scriptProperties['scssHash']:$modx->getOption($options['nameoptions'].'scssHash', null, true);
+$options['autoprefixer'] 	            = (!empty($scriptProperties['autoprefixer']))?$scriptProperties['autoprefixer']:$modx->getOption($options['nameoptions'].'autoprefixer', null, true);
+$options['autoprefixerVendor']          = (!empty($scriptProperties['autoprefixerVendor']))?$scriptProperties['autoprefixerVendor']:$modx->getOption($options['nameoptions'].'autoprefixerVendor', null, 'IE,Webkit,Mozilla');
+$options['fileHash']                    = (!empty($scriptProperties['fileHash']))?$scriptProperties['fileHash']:$modx->getOption($options['nameoptions'].'fileHash', null, $options['corePath'] . 'cache/scss/'.$options['fileScss'].'.txt');
+
+$options['pathUrlScss']                 = pathinfo($options['fileScss']);
+$options['dirUrlScss']                  = $options['pathUrlScss']['dirname'];
+$options['pathUrlCss']                  = pathinfo($options['fileCss']);
+$options['dirUrlCss']                   = $options['pathUrlCss']['dirname'];
+$options['filePathCss']                 = $options['basePath'].$options['fileCss'];
+$options['fileUrlCss']                  = $options['baseUrl'].$options['fileCss'];
+
+$options['map']['sourceMapURL']		    = $options['fileUrlCss'].'.map';
+$options['map']['sourceMapFilename']    = $options['fileUrlCss'];
+$options['map']['sourceMapBasepath']    = $options['basePath'];
+$options['map']['sourceRoot']           = $options['baseUrl'];
+
+
+require_once($options['vendorPath'].'autoload.php' );
+
+use ScssPhp\ScssPhp\Compiler;
+use ScssPhp\ScssPhp\OutputStyle;
+use Padaliyajay\PHPAutoprefixer\Autoprefixer;
 
 if(!function_exists('parser')){
     function parser($value){
@@ -31,16 +64,20 @@ if(!function_exists('scssPaths')){
     function scssPaths($options){
         global $modx;
         $RESULT = array();
-        foreach (explode(',', $options['fileScss']) as $FILE){
-            $FILE = str_replace($options['siteUrl'], "", parser($FILE));
-        	$FILE = $options['basePath'].'/'.deleteDomain($FILE);
-        	if (file_exists($FILE) && (strtolower(pathinfo($FILE,PATHINFO_EXTENSION))=='scss')) {
-        		$result[]= file_get_contents($FILE);
-        	}else{
-        	    $modx->log(1, 'SCSS - Не удалось найти файл: ' . $FILE);
-        	}
+        if(!empty($options['fileScss'])){
+            foreach (explode(',', $options['fileScss']) as $FILE){
+                $FILE = str_replace($options['siteUrl'], "", parser($FILE));
+            	$FILE = $options['basePath'].'/'.$FILE;
+            	if (file_exists($FILE) && (strtolower(pathinfo($FILE,PATHINFO_EXTENSION))=='scss')) {
+            		$RESULT[]= file_get_contents($FILE);
+            	}else{
+            	    $modx->log(1, 'SCSS - Не удалось найти файл: ' . $FILE);
+            	}
+            }
+            return implode("", $RESULT);
+        }else{
+            return false;
         }
-        return implode("", $RESULT);
     }
 }
 if(!function_exists('importPaths')){
@@ -48,10 +85,9 @@ if(!function_exists('importPaths')){
         global $modx;
         $RESULT = array();
 		if(!empty($options['importPaths'])){
-		    $options['importPaths'] = explode(",", $options['importPaths']);
-			foreach ($options['importPaths'] as $FILE){
+			foreach (explode(",", $options['importPaths']) as $FILE){
 			    $FILE = str_replace($options['siteUrl'], "", parser($FILE));
-        	    $FILE = $options['basePath'].'/'.deleteDomain($FILE);
+        	    $FILE = $options['basePath'].$FILE;
 				if(file_exists($FILE)){
 					$RESULT[] = $FILE;
 				}else{
@@ -111,54 +147,13 @@ if(!function_exists('autoprefixer')){
     }
 }
 
-$options['name'] 			            = 'scss';
-$options['nameoptions'] 	            = $options['name'].'.';
-
-$options['corePath']                    = (!empty($scriptProperties['core_path']))?$scriptProperties['core_path']:$modx->getOption($options['nameoptions'].'core_path', null, $modx->getOption('core_path'));
-$options['componentPath'] 	            = (!empty($scriptProperties['component_path']))?$scriptProperties['component_path']:$modx->getOption($options['nameoptions'].'component_path', null, $options['corePath'].'components/'.$options['name'] .'/');
-$options['vendorPath'] 		            = (!empty($scriptProperties['vendor_path']))?$scriptProperties['vendor_path']:$modx->getOption($options['nameoptions'].'vendor_path', null, $options['componentPath'] . 'vendor/');
-$options['basePath'] 		            = (!empty($scriptProperties['base_path']))?$scriptProperties['base_path']:$modx->getOption($options['nameoptions'].'base_path', null, $modx->getOption('base_path'));
-$options['baseUrl'] 		            = (!empty($scriptProperties['base_url']))?$scriptProperties['base_url']:$modx->getOption($options['nameoptions'].'base_url', null, $modx->getOption('base_url'));
-$options['siteUrl'] 		            = (!empty($scriptProperties['site_url']))?$scriptProperties['site_url']:$modx->getOption($options['nameoptions'].'site_url', null, $modx->getOption('site_url'));
-$options['assetsUrl']  		            = (!empty($scriptProperties['assets_url']))?$scriptProperties['assets_url']:$modx->getOption($options['nameoptions'].'assets_url', null, $modx->getOption('assets_url'));
-$options['admin'] 			            = (!empty($scriptProperties['admin']))?$scriptProperties['admin']:$modx->getOption($options['nameoptions'].'admin', null, true);
-$options['fileScss']                    = (!empty($scriptProperties['fileScss']))?$scriptProperties['fileScss']:$modx->getOption($options['nameoptions'].'fileScss', null, $options['assetsUrl']. 'scss/styles.scss',true);
-$options['fileCss']                     = (!empty($scriptProperties['fileCss']))?$scriptProperties['fileCss']:$modx->getOption($options['nameoptions'].'fileCss', null, $options['assetsUrl']. 'css/styles.css',true);
-$options['importPaths']                 = (!empty($scriptProperties['importPaths']))?$scriptProperties['importPaths']:$modx->getOption($options['nameoptions'].'importPaths', null, '', true);
-$options['outputStyle']  	            = (!empty($scriptProperties['outputStyle']))?$scriptProperties['outputStyle']:$modx->getOption($options['nameoptions'].'outputStyle', null, false);
-$options['sourceMap'] 	                = (!empty($scriptProperties['sourceMap']))?$scriptProperties['sourceMap']:$modx->getOption($options['nameoptions'].'sourceMap', null, false);
-$options['scssHash'] 	                = (!empty($scriptProperties['scssHash']))?$scriptProperties['scssHash']:$modx->getOption($options['nameoptions'].'scssHash', null, true);
-$options['autoprefixer'] 	            = (!empty($scriptProperties['autoprefixer']))?$scriptProperties['autoprefixer']:$modx->getOption($options['nameoptions'].'autoprefixer', null, true);
-$options['autoprefixerVendor']          = (!empty($scriptProperties['autoprefixerVendor']))?$scriptProperties['autoprefixerVendor']:$modx->getOption($options['nameoptions'].'autoprefixerVendor', null, 'IE,Webkit,Mozilla');
-$options['fileHash']                    = (!empty($scriptProperties['fileHash']))?$scriptProperties['fileHash']:$modx->getOption($options['nameoptions'].'fileHash', null, $options['corePath'] . 'cache/scss/'.$options['fileScss'].'.txt');
-
-$options['pathUrlScss']                 = pathinfo($options['fileScss']);
-$options['dirUrlScss']                  = $options['pathUrlScss']['dirname'];
-$options['pathUrlCss']                  = pathinfo($options['fileCss']);
-$options['dirUrlCss']                   = $options['pathUrlCss']['dirname'];
-$options['filePathCss']                 = $options['basePath'].$options['fileCss'];
-$options['fileUrlCss']                  = $options['baseUrl'].$options['fileCss'];
-
-$options['fileScss']                    = scssPaths($options);
-
-$options['map']['sourceMapURL']		    = $options['fileUrlCss'].'.map';
-$options['map']['sourceMapFilename']    = $options['fileUrlCss'];
-$options['map']['sourceMapBasepath']    = $options['basePath'];
-$options['map']['sourceRoot']           = $options['baseUrl'];
-
-
-require_once($options['vendorPath'].'autoload.php' );
-
-use ScssPhp\ScssPhp\Compiler;
-use ScssPhp\ScssPhp\OutputStyle;
-use Padaliyajay\PHPAutoprefixer\Autoprefixer;
-
 if($options['admin']){
     $isAuth = $modx->user->isAuthenticated('mgr') && $modx->user->isAuthenticated($modx->context->key);
 	if(!$isAuth && !$modx->user->isMember(array('Administrator'))) return;
 }
 
-if(!empty($options['fileScss'])){
+if(scssPaths($options)){
+    $options['fileScss'] = scssPaths($options);
 	if (isHASH($options) || !file_exists($options['filePathCss'])){
 		try{
 			$compiler = new Compiler();
@@ -177,17 +172,16 @@ if(!empty($options['fileScss'])){
 			}
 			
 			$result	= $compiler->compileString($options['fileScss']);
+			
 			$css = autoprefixer($result->getCss(),$options);
 			
 			file_put_contents($options['filePathCss'], $css);
 			if($options['sourceMap']) file_put_contents($options['filePathCss'].'.map', $result->getSourceMap());
 
 			setHASH($options);
-			
 		}catch (\Exception $e){
 			if($error = $e->getMessage()) $modx->log(modX::LOG_LEVEL_ERROR, 'SCSS - Не удалось скомпилировать: ' . $error);
 		}
 	}
 }
-
 return;
