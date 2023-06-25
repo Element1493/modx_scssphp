@@ -11,9 +11,9 @@ $options['baseUrl'] 		            = (!empty($scriptProperties['base_url']))?$scr
 $options['siteUrl'] 		            = (!empty($scriptProperties['site_url']))?$scriptProperties['site_url']:$modx->getOption($options['nameoptions'].'site_url', null, $modx->getOption('site_url'));
 $options['assetsUrl']  		            = (!empty($scriptProperties['assets_url']))?$scriptProperties['assets_url']:$modx->getOption($options['nameoptions'].'assets_url', null, $modx->getOption('assets_url'));
 $options['admin'] 			            = (!empty($scriptProperties['admin']))?$scriptProperties['admin']:$modx->getOption($options['nameoptions'].'admin', null, true);
-$options['fileScss']                    = (!empty($scriptProperties['fileScss']))?$scriptProperties['fileScss']:$modx->getOption($options['nameoptions'].'fileScss', null, $options['assetsUrl']. 'scss/styles.scss',true);
-$options['fileCss']                     = (!empty($scriptProperties['fileCss']))?$scriptProperties['fileCss']:$modx->getOption($options['nameoptions'].'fileCss', null, $options['assetsUrl']. 'css/styles.css',true);
-$options['importPaths']                 = (!empty($scriptProperties['importPaths']))?$scriptProperties['importPaths']:$modx->getOption($options['nameoptions'].'importPaths', null, '', true);
+$options['fileScss']                    = (!empty($scriptProperties['fileScss']))?$scriptProperties['fileScss']:$modx->getOption($options['nameoptions'].'fileScss', null, $options['assetsUrl']. 'scss/styles.scss');
+$options['fileCss']                     = (!empty($scriptProperties['fileCss']))?$scriptProperties['fileCss']:$modx->getOption($options['nameoptions'].'fileCss', null, $options['assetsUrl']. 'css/styles.css');
+$options['importPaths']                 = (!empty($scriptProperties['importPaths']))?$scriptProperties['importPaths']:$modx->getOption($options['nameoptions'].'importPaths', null, '');
 $options['outputStyle']  	            = (!empty($scriptProperties['outputStyle']))?$scriptProperties['outputStyle']:$modx->getOption($options['nameoptions'].'outputStyle', null, false);
 $options['sourceMap'] 	                = (!empty($scriptProperties['sourceMap']))?$scriptProperties['sourceMap']:$modx->getOption($options['nameoptions'].'sourceMap', null, false);
 $options['scssHash'] 	                = (!empty($scriptProperties['scssHash']))?$scriptProperties['scssHash']:$modx->getOption($options['nameoptions'].'scssHash', null, true);
@@ -67,8 +67,8 @@ if(!function_exists('scssPaths')){
         if(!empty($options['fileScss'])){
             foreach (explode(',', $options['fileScss']) as $FILE){
                 $FILE = str_replace($options['siteUrl'], "", parser($FILE));
-            	$FILE = $options['basePath'].'/'.$FILE;
-            	if (file_exists($FILE) && (strtolower(pathinfo($FILE,PATHINFO_EXTENSION))=='scss')) {
+            	$FILE = $options['basePath'].ltrim($FILE,'/');
+            	if (file_exists($FILE) && (strtolower(pathinfo($FILE,PATHINFO_EXTENSION))==$options['name'])) {
             		$RESULT[]= file_get_contents($FILE);
             	}else{
             	    $modx->log(1, 'SCSS - Не удалось найти файл: ' . $FILE);
@@ -87,7 +87,7 @@ if(!function_exists('importPaths')){
 		if(!empty($options['importPaths'])){
 			foreach (explode(",", $options['importPaths']) as $FILE){
 			    $FILE = str_replace($options['siteUrl'], "", parser($FILE));
-        	    $FILE = $options['basePath'].$FILE;
+        	    $FILE = $options['basePath'].ltrim($FILE,'/');
 				if(file_exists($FILE)){
 					$RESULT[] = $FILE;
 				}else{
