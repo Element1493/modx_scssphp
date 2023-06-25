@@ -5,71 +5,7 @@ $snippets = array();
 $tmp = array(
 	'SCSS' => array(
 		'name'=> 'scss',
-		'properties' => array(
-			array(
-				'name' => 'autoprefixer',
-				'desc' => 'Автопрефиксер',
-				'type' => 'combo-boolean',
-				'options' => '',
-				'value' => '',
-			),
-			array(
-				'name' => 'autoprefixerVendor',
-				'desc' => 'Список префиксoв',
-				'type' => 'textfield',
-				'options' => '',
-				'value' => 'IE,Webkit,Mozilla',
-			),
-			array(
-				'name' => 'admin',
-				'desc' => 'Выполнить код для авторизованных',
-				'type' => 'combo-boolean',
-				'options' => '',
-				'value' => '',
-			),
-			array(
-				'name' => 'fileScss',
-				'desc' => 'Список файлов SCSS',
-				'type' => 'textfield',
-				'options' => '',
-				'value' => '',
-			),
-			array(
-				'name' => 'fileCss',
-				'desc' => 'Путь к файлу CSS',
-				'type' => 'textfield',
-				'options' => '',
-				'value' => '',
-			),
-			array(
-				'name' => 'importPaths',
-				'desc' => 'Путь к файлам импорта',
-				'type' => 'textfield',
-				'options' => '',
-				'value' => '',
-			),
-			array(
-				'name' => 'outputStyle',
-				'desc' => 'Сжать выходной файл CSS',
-				'type' => 'combo-boolean',
-				'options' => '',
-				'value' => '',
-			),
-			array(
-				'name' => 'scssHash',
-				'desc' => 'Hash SCSS',
-				'type' => 'combo-boolean',
-				'options' => '',
-				'value' => '',
-			),
-			array(
-				'name' => 'sourceMap',
-				'desc' => 'Сгенерировать Source Map',
-				'type' => 'combo-boolean',
-				'options' => '',
-				'value' => '',
-			)
-		)
+		'properties' => array()
 	)
 );
 
